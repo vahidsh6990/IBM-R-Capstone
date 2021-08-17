@@ -1,0 +1,66 @@
+#now we want to drop the missing values in rented_bike_count
+drop_na_rows <- bike_sharing_df %>% drop_na(RENTED_BIKE_COUNT)
+dim(drop_na_rows)
+head(drop_na_rows)
+
+#now we want to work on temperature missing values
+drop_na_rows %>% 
+  filter(is.na(TEMPERATURE))
+
+#finding the mean for temperatures of Summer
+summer_filter <- filter(drop_na_rows, SEASONS == 'Summer')
+summer_filter2 <- summer_filter %>%
+  filter(!is.na(TEMPERATURE))
+summer_filter2 %>% 
+  filter(is.na(TEMPERATURE))
+summer_mean <- mean(summer_filter2$TEMPERATURE)
+
+
+replace_na <- drop_na_rows %>% replace_na(list(TEMPERATURE = summer_mean))
+head(replace_na)
+replace_na %>%
+  filter(is.na(TEMPERATURE))
+
+write.csv(replace_na, file = "C:/Users/WIN10  S/R/seoul_bike_sharing.csv")
+
+
+
+#dummy variables
+bike_sharing_df <- read_csv("raw_seoul_bike_sharing.csv")
+bike_sharing_df <- bike_sharing_df %>% mutate(HOUR = as.character(Hour))
+
+
+bike_sharing_df <- bike_sharing_df %>%
+  mutate(dummy = 1) %>% # column with single value
+  spread(
+    key = SEASONS, # column to spread
+    value = dummy,
+    fill = 0)
+
+bike_sharing_df <- bike_sharing_df %>%
+  mutate(dummy = 1) %>% # column with single value
+  spread(
+    key = FUNCTIONING_DAY, # column to spread
+    value = dummy,
+    fill = 0)
+
+bike_sharing_df <- bike_sharing_df %>%
+  mutate(dummy = 1) %>% # column with single value
+  spread(
+    key = HOLIDAY, # column to spread
+    value = dummy,
+    fill = 0)
+
+
+write_csv(bike_sharing_df, file = "C:/Users/WIN10  S/R/seoul_bike_sharing.csv")
+
+
+
+
+#data normalization
+bike_sharing_df <- read_csv("seoul_bike_sharing.csv")
+
+normalize <- function(x, na.rm = TRUE) {
+  return((x- min(x)) /(max(x)-min(x)))
+}
+normalize(bike_sharing_df$RENTED_BIKE_COUNT)
